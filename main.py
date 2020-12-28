@@ -10,7 +10,7 @@ import subprocess
 import shutil
 
 #####
-
+xxx = 1
 
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
 parser.add_argument('--data_dir', type=str, default='/home/zhangxiaojie2017/data/originals',
