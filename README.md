@@ -1,4 +1,3 @@
-<br />
 <p>
   <h3>3D Reconstruction with openMVG + openMVS + Background subtraction</h3>
 </p>
