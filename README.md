@@ -1,6 +1,6 @@
 <br />
-<p align="center">
-  <h3 align="center">3D Reconstruction with openMVG + openMVS + Background subtraction</h3>
+<p>
+  <h3>3D Reconstruction with openMVG + openMVS + Background subtraction</h3>
 </p>
 
 <!-- GETTING STARTED -->
