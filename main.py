@@ -9,6 +9,9 @@ import argparse
 import subprocess
 import shutil
 
+#####
+
+
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
 parser.add_argument('--data_dir', type=str, default='/home/zhangxiaojie2017/data/originals',
                     help="the directory which contains the pictures set.")
