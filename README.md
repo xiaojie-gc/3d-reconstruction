@@ -1,4 +1,4 @@
-<h3>3D Reconstruction with [openMVG](https://github.com/openMVG/openMVG) + [openMVS](https://github.com/cdcseacave/openMVS) + Background subtraction</h3>
+3D Reconstruction with [openMVG](https://github.com/openMVG/openMVG) + [openMVS](https://github.com/cdcseacave/openMVS) + Background subtraction
 
 <!-- GETTING STARTED -->
 ## Getting Started
