@@ -1,4 +1,4 @@
-<h3>3D Reconstruction with openMVG + openMVS + Background subtraction</h3>
+<h3>3D Reconstruction with [openMVG](https://github.com/openMVG/openMVG) + [openMVS](https://github.com/cdcseacave/openMVS) + Background subtraction</h3>
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -31,7 +31,30 @@ To get a local copy up and running follow these simple example steps.
    
    Use Google Compute Engine with 8 vCPUs and NVIDIA Tesla V100 (5120 CUDA cores).
    
-   a. Those results are from 3D reconstruction using background subtraction (we will add merger time later):
+   a. Those results are from 3D reconstruction using original images. The "Densify point cloud" takes 70 seconds.
+   ```sh
+   {
+        "timeList": [
+            {
+                "model": "path to /full",
+                "time": {
+                    "Intrinsics analysis": 0.02153801918029785,
+                    "Compute features": 2.1476070880889893,
+                    "Compute matches": 0.5026075839996338,
+                    "Incremental reconstruction": 0.7004132270812988,
+                    "Export to openMVS": 1.9742863178253174,
+                    "Densify point cloud": 70.24964547157288,
+                    "Reconstruct the mesh": 11.7359459400177,
+                    "Refine the mesh": 11.944321632385254,
+                    "Texture the mesh": 10.571678638458252
+                }
+             }
+        ]
+    } 
+   ```
+  
+   b. Those results are from 3D reconstruction using background subtraction (we will add merger time later). The total "Densify point cloud" takes
+   12 + 47 = 59 seconds.
    ```sh
     {
         "timeList": [
@@ -64,29 +87,14 @@ To get a local copy up and running follow these simple example steps.
         ]
     }
     ```
-   b. Those results are from 3D reconstruction using original images.
-   ```sh
-   {
-        "timeList": [
-            {
-                "model": "path to /full",
-                "time": {
-                    "Intrinsics analysis": 0.02153801918029785,
-                    "Compute features": 2.1476070880889893,
-                    "Compute matches": 0.5026075839996338,
-                    "Incremental reconstruction": 0.7004132270812988,
-                    "Export to openMVS": 1.9742863178253174,
-                    "Densify point cloud": 70.24964547157288,
-                    "Reconstruct the mesh": 11.7359459400177,
-                    "Refine the mesh": 11.944321632385254,
-                    "Texture the mesh": 10.571678638458252
-                }
-             }
-        ]
-    } 
-   ```
-   
-    
+
+
+<!-- problems -->
+## Current Problems (unsolved)
+1. The creation of foreground and background needs improvement.
+2. The reconstruction of foreground may stops after "Reconstruct the mesh".
+3. Finish merge.
+
 ## Authors
 
 1. Andrew Hilton
