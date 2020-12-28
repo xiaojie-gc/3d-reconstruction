@@ -13,12 +13,17 @@ To get a local copy up and running follow these simple example steps.
    ```sh
    git clone https://github.com/xiaojie-gc/3d-reconstruction.git
    ```
-3. Install packages
+2. Install packages
 
    ```sh
    pip3 install -r requirements.txt
    ```
+3. Modify reconstructor (i.e., MvgMvsPipeline.py)
 
+   ```sh 
+   CAMERA_SENSOR_DB_DIRECTORY = "your path"
+   ```
+   
 <!-- USAGE EXAMPLES -->
 ## Usage
 
