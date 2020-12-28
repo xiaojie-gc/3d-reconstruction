@@ -180,7 +180,7 @@ class StepsStore:
         self.steps_data = [
             ["Intrinsics analysis",          # 0
              os.path.join(OPENMVG_BIN, "openMVG_main_SfMInit_ImageListing"),
-             ["-i", "%input_dir%", "-o", "%matches_dir%", "-d", "%camera_file_params%", "-f", "2439"]],
+             ["-i", "%input_dir%", "-o", "%matches_dir%", "-d", "%camera_file_params%", "-f", "2304"]],
             ["Compute features",             # 1
              os.path.join(OPENMVG_BIN, "openMVG_main_ComputeFeatures"),
              ["-i", "%matches_dir%/sfm_data.json", "-o", "%matches_dir%", "-m", "SIFT", "-n", "4"]],
@@ -327,9 +327,14 @@ if 2 in CONF.steps:    # ComputeMatches
         # Set the geometric_model of ComputeMatches to Essential
         STEPS[2].opt.extend(["-g", "e"])
 
+import json
+import time
+
+timeList = {}
+
 for cstep in CONF.steps:
     printout("#%i. %s" % (cstep, STEPS[cstep].info), effect=INVERSE)
-
+    startTime = time.time()
     # Retrieve "passthrough" commandline options
     opt = getattr(CONF, str(cstep))
     if opt:
@@ -364,5 +369,14 @@ for cstep in CONF.steps:
             sys.exit('\r\nProcess canceled by user, all files remains')
     else:
         print('\t'.join(cmdline))
+    timeList[STEPS[cstep].info] = time.time() - startTime
 
 printout("# Pipeline end #", effect=INVERSE)
+
+with open("time.json", "r") as jsonFile:
+    time_file = json.load(jsonFile)
+
+time_file["timeList"].append({"model": CONF.input_dir , "time": timeList})
+
+with open('time.json', 'w', encoding='utf-8') as f:
+    json.dump(time_file, f, indent=4)

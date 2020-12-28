@@ -8,7 +8,7 @@ from pathlib import Path
 import argparse
 import subprocess
 import shutil
-
+import json
 
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
 parser.add_argument('--data_dir', type=str, default='/home/zhangxiaojie2017/data/originals',
@@ -19,11 +19,19 @@ parser.add_argument('--bg_dir', type=str, default='/home/zhangxiaojie2017/data/b
                     help="the directory which contains the background pictures set.")
 parser.add_argument('--output_dir', type=str, default='/home/zhangxiaojie2017/data/results',
                     help="the directory which contains the final results.")
-parser.add_argument('--reconstructor', type=str, default='/home/zhangxiaojie2017/3d-reconstruction/MvgMvsPipeline.py',
+parser.add_argument('--reconstructor', type=str, default='MvgMvsPipeline.py',
                     help="the directory which contains the reconstructor python script.")
 
 
 args = parser.parse_args()
+
+with open("time.json", "r") as jsonFile:
+    time_file = json.load(jsonFile)
+
+time_file["timeList"] = []
+
+with open('time.json', 'w', encoding='utf-8') as f:
+    json.dump(time_file, f, indent=4)
 
 shutil.rmtree(args.fg_dir)
 shutil.rmtree(args.bg_dir)
@@ -86,16 +94,21 @@ for timestamp in range(0, 2):
     try:
         # start to run openMvg + openMvs for foreground
         print("start to reconstruct {}/{}".format(fg_dir, str_timestamp))
-        p = subprocess.Popen(["python3", args.reconstructor, fg_dir, fg_output_dir], stdout=subprocess.PIPE)
+        start = time.time()
+        p = subprocess.Popen(["python3", args.reconstructor, fg_dir, fg_output_dir])
         p.wait()
         if p.returncode != 0:
             break
+        print("foreground finished in {}".format(time.time() - start))
+
         # start to run openMvg + openMvs for background
         print("start to reconstruct {}/{}".format(bg_dir, str_timestamp))
-        p = subprocess.Popen(["python3", args.reconstructor, bg_dir, bg_output_dir], stdout=subprocess.PIPE)
+        start = time.time()
+        p = subprocess.Popen(["python3", args.reconstructor, bg_dir, bg_output_dir])
         p.wait()
         if p.returncode != 0:
             break
+        print("foreground finished in {}".format(time.time() - start))
     except KeyboardInterrupt:
         sys.exit('\r\nProcess canceled by user, all files remains')
 
