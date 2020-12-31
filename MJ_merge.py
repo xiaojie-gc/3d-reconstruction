@@ -197,10 +197,12 @@ def do_merge(path1, path2, path3, path4, path5):
     R, t = get_transform(fg2, bg2, cen_fg, cen_bg)
 
     fg_texture = PlyData.read(path3)
-    
+
     # Get the number of points
     number_points_fg = len(fg_texture.elements[0].data)
     number_elements_for_each_point = len(fg_texture.elements[0].data[0])
+
+    print('Number of points:', number_elements_for_each_point, 'points.')
 
     # Get the number of faces
     number_faces_fg = len(fg_texture.elements[1].data)
@@ -208,7 +210,8 @@ def do_merge(path1, path2, path3, path4, path5):
     a = len(fg_texture.elements[1].data[0][0])
     b = len(fg_texture.elements[1].data[0][1])
     number_of_elements_for_each_face = a+b+2
-    #print('Each face has',number_of_elements_for_each_face,'elements.')
+
+    print('Each face has',number_of_elements_for_each_face,'elements.')
 
     B = PlyData.read(path4)
     BB = str(B)
@@ -219,7 +222,7 @@ def do_merge(path1, path2, path3, path4, path5):
     bb = len(B.elements[1].data[0][1])
     B_pc = B['vertex'].data
     B_pc_array = np.array([[x,y,z] for x,y,z in B_pc])
-    
+
 
     # Get the positions of all the points
     pc = fg_texture['vertex'].data
@@ -259,7 +262,7 @@ def do_merge(path1, path2, path3, path4, path5):
                 f.write(str(n))
                 f.write(' ')
             f.write('\n')
-        
+
         # output the faces (A goes first)
         for i in range(number_faces_fg):
           f.write(str(a))
@@ -272,7 +275,7 @@ def do_merge(path1, path2, path3, path4, path5):
           for k in range(b):
             f.write(str(fg_texture.elements[1].data[i][1][k]))
             f.write(' ')
-          f.write('\n')   
+          f.write('\n')
 
         ''' output the faces (B goes 2nd) '''
         for m in range(B_F_num_int):
