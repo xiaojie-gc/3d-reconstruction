@@ -75,9 +75,11 @@ def get_matching_points(fg_image_id, fg_2d, fg_3d, bg_image_id, bg_2d, bg_3d):
                     if fg_image_id[i][j] == bg_image_id[m][n]:
                         x_diff = fg_2d[i][j][0]-bg_2d[m][n][0]
                         y_diff = fg_2d[i][j][1]-bg_2d[m][n][1]
-                        if abs(x_diff)<0.1 and abs(y_diff)<0.1:
+                        if abs(x_diff) < 0.1 and abs(y_diff) < 0.1:
                             match_fg_3d.append(fg_3d[i])
                             match_bg_3d.append(bg_3d[m])
+
+    print('********************************************** length of match_fg_3d:', len(match_fg_3d))
     match_bg_3d_2 = []
     match_fg_3d_2 = []
     

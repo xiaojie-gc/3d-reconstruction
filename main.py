@@ -11,6 +11,7 @@ import shutil
 import json
 
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
+
 parser.add_argument('--data_dir', type=str, default='data/originals',
                     help="the directory which contains the pictures set.")
 parser.add_argument('--fg_dir', type=str, default='data/fg',
@@ -21,6 +22,8 @@ parser.add_argument('--output_dir', type=str, default='data/results',
                     help="the directory which contains the final results.")
 parser.add_argument('--reconstructor', type=str, default='MvgMvsPipeline.py',
                     help="the directory which contains the reconstructor python script.")
+parser.add_argument('--fg_adc', type=int, default=200, help="the advancement of foreground mask.")
+parser.add_argument('--bg_adc', type=int, default=160, help="the advancement of background mask.")
 
 
 args = parser.parse_args()
@@ -76,11 +79,11 @@ for timestamp in range(0, 2):
         extracted_binary_foreground = backSub[image_dir].apply(image)
 
         # save foreground image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=150, color=True)
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.fg_adc, color=True)
         cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask)
 
         # save background image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=120, color=False)
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.bg_adc, color=False)
         background_mask = bsub.create_background(img_mask, image, color=True)
         cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask)
 
@@ -140,10 +143,10 @@ for timestamp in range(0, 2):
         path2 = bg_output_dir + "/sfm/sfm_data.json"
 
             # path 3 -> foreground final texture.ply
-        path3 = fg_output_dir + "/mvs/scene_dense_mesh_texture.ply"
+        path3 = fg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
 
             # path 4 -> background final texture.ply
-        path4 = bg_output_dir + "/mvs/scene_dense_mesh_texture.ply"
+        path4 = bg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
 
             # path 5 -> output.ply
         path5 = args.output_dir + '/result.ply'
