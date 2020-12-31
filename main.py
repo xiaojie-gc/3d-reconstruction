@@ -11,13 +11,13 @@ import shutil
 import json
 
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
-parser.add_argument('--data_dir', type=str, default='/home/zhangxiaojie2017/data/originals',
+parser.add_argument('--data_dir', type=str, default='data/originals',
                     help="the directory which contains the pictures set.")
-parser.add_argument('--fg_dir', type=str, default='/home/zhangxiaojie2017/data/fg',
+parser.add_argument('--fg_dir', type=str, default='data/fg',
                     help="the directory which contains the foreground pictures set.")
-parser.add_argument('--bg_dir', type=str, default='/home/zhangxiaojie2017/data/bg',
+parser.add_argument('--bg_dir', type=str, default='data/bg',
                     help="the directory which contains the background pictures set.")
-parser.add_argument('--output_dir', type=str, default='/home/zhangxiaojie2017/data/results',
+parser.add_argument('--output_dir', type=str, default='data/results',
                     help="the directory which contains the final results.")
 parser.add_argument('--reconstructor', type=str, default='MvgMvsPipeline.py',
                     help="the directory which contains the reconstructor python script.")
