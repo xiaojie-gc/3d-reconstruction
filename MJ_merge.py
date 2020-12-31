@@ -9,8 +9,6 @@ The idea of function-4 (get_transform) comes from the ICP algorithm,
 but in our case, we don't need to do the iterative process to get
 the matching-point sets, because we got those from .json files.
 
-Problem so far is the user has to input the paths by hand, hope
-this can be solved tomorrow.
 """
 
 import json
