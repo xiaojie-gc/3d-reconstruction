@@ -183,7 +183,7 @@ class StepsStore:
              ["-i", "%input_dir%", "-o", "%matches_dir%", "-d", "%camera_file_params%", "-f", "1715"]],
             ["Compute features",             # 1
              os.path.join(OPENMVG_BIN, "openMVG_main_ComputeFeatures"),
-             ["-i", "%matches_dir%/sfm_data.json", "-o", "%matches_dir%", "-m", "SIFT", "-n", "4"]],
+             ["-i", "%matches_dir%/sfm_data.json", "-o", "%matches_dir%", "-m", "SIFT", "-n", "4", "-p", "HIGH"]],
             ["Compute matches",              # 2
              os.path.join(OPENMVG_BIN, "openMVG_main_ComputeMatches"),
              ["-i", "%matches_dir%/sfm_data.json", "-o", "%matches_dir%", "-n", "HNSWL2", "-r", ".8"]],

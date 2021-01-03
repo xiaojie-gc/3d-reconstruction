@@ -49,6 +49,8 @@ backSub = {}
 for image_dir in os.listdir(args.data_dir):
     backSub[image_dir] = cv2.createBackgroundSubtractorMOG2(history=10, varThreshold=216, detectShadows=False)
 
+fail = { "timestamp": [] }
+
 for timestamp in range(0, 2):
     str_timestamp = str(timestamp).zfill(5)
     print("current timestamp: ", str_timestamp, '-' * 50)
@@ -79,15 +81,15 @@ for timestamp in range(0, 2):
         extracted_binary_foreground = backSub[image_dir].apply(image)
 
         # save foreground image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=200, color=False)
-        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg_mask.png"), img_mask) # foreground mask
-        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), image) # regular image
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=120, color=True)
+        # cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg_mask.png"), img_mask) # foreground mask
+        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask) # regular image
 
         # save background image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=180, color=False)
-        background_mask = bsub.create_background(img_mask, image, color=False)
-        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg_mask.png"), background_mask) # background mask
-        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), image) # regular image
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=90, color=False)
+        background_mask = bsub.create_background(img_mask, image, color=True)
+        # cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg_mask.png"), background_mask) # background mask
+        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask) # regular image
 
     if timestamp == 0:
         continue
@@ -151,13 +153,16 @@ for timestamp in range(0, 2):
         path4 = bg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
 
             # path 5 -> output.ply
-        path5 = args.output_dir + '/result.ply'
+        path5 = args.output_dir + '/result_' + str_timestamp + '.ply'
 
         merge.do_merge(path1, path2, path3, path4, path5)
 
-    except subprocess.CalledProcessError:
-        break
+    except:
+        fail["timestamp"].append(str_timestamp)
 
+
+with open('fail.json', 'w', encoding='utf-8') as f:
+    json.dump(fail, f, indent=4)
 
 
 
