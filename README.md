@@ -96,9 +96,7 @@ To get a local copy up and running follow these simple example steps.
 
 <!-- problems -->
 ## Current Problems (unsolved)
-1. The creation of foreground and background needs improvement.
-2. The reconstruction of foreground may stops after "Reconstruct the mesh".
-3. Finish merge.
+1. Evaluation
 
 ## Authors
 
