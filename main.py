@@ -80,16 +80,12 @@ for timestamp in range(0, 2):
 
         extracted_binary_foreground = backSub[image_dir].apply(image)
 
-        # save foreground image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=120, color=True)
-        # cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg_mask.png"), img_mask) # foreground mask
-        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask) # regular image
-
-        # save background image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=90, color=False)
-        background_mask = bsub.create_background(img_mask, image, color=True)
-        # cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg_mask.png"), background_mask) # background mask
-        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask) # regular image
+        # create background and foreground images
+        backsub_success, fg , bg_to_fg, box_areas = bsub.create_fg_mask( extracted_binary_foreground, image, fg_advancement = 120, 
+                                                                     bg_advancement = 90, color = True)
+        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), fg) # save foreground image
+        bg = bsub.create_background(bg_to_fg, image, color=True) # create background image
+        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), bg) # save background image
 
     if timestamp == 0:
         continue

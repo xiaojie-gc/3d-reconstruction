@@ -29,11 +29,11 @@ def create_background(fg_mask, img, color = False):
     """
     bg = cv2.bitwise_not(fg_mask)
     if color is True:
-        bg = cv2.bitwise_and(img, img, mask=bg)     # use this line if color is desired over binary mask
+        bg = cv2.bitwise_and(img,img, mask = bg) #use this line if color is desired over binary mask
     return bg
 
 # expands bounding box to include background pixels for better feature detection
-def expand_bounding_box(ystart, xstart, ystop, xstop, img_xsize, img_ysize, advancement = 150):
+def expand_bounding_box(ystart, xstart, ystop, xstop, img_xsize, img_ysize, advancement):
     """
     expand_bounding_box takes bounding boxes and expands them in all directions by the desired amount. 
     
@@ -64,6 +64,7 @@ def expand_bounding_box(ystart, xstart, ystop, xstop, img_xsize, img_ysize, adva
         New bottom right most x coordinate.
     xstop : int
         New bottom right most x coordinate.
+        
     Notes
     -----
     This allows the foreground mask to include some background pixles in addition to the foreground. This allows for better feature detection when using openMVG.
@@ -75,7 +76,7 @@ def expand_bounding_box(ystart, xstart, ystop, xstop, img_xsize, img_ysize, adva
     xstop = min(xstop+advancement, img_xsize)
     return ystart, xstart, ystop, xstop
 
-def kmeans_helper(image, advancement, grid_width = 45):
+def kmeans_helper(image, fg_advancement, bg_advancement, grid_width = 45):
     """
     Cluster nonzero pixels and return bounding boxes around each cluster.
 
@@ -85,6 +86,10 @@ def kmeans_helper(image, advancement, grid_width = 45):
         Binary image from frame subtraction.
     grid_width : int 
         Determines the size of the grid squares to be used for grid search algorithm. Higher value = less time, less accuracy. Lower value = more time, more accuracy.
+    fg_advancement : int
+        The number of pixels the bounding box for foreground image is to be expanded by.
+    bg_advancement : int 
+        The number of pixels the bounding box for background image is to be expanded by.
 
     Returns
     -------
@@ -92,26 +97,30 @@ def kmeans_helper(image, advancement, grid_width = 45):
         True, if clustering was successful.
     foreground_mask : Numpy array
         Binary image containing bounding boxes around foreground clusters. If success = false, this will be type None.
+    fg_to_background : Numpy array
+        foreground mask with different advancement value that will be turned into the background image.
+    box_areas : list of ints
+        List containing the area of each bounding box. Areas are calculated using foreground image boxes.
     Notes
     -----
     To reduce computational complexity, a grid search algorithm is used before kmeans clustering to reduce the amount of points. From here the points from grid search are used for clustering. Then bounding boxes are drawn around each of those clusters. This comes with the trade off of potentially losing some accuracy.
     """
-    #initialize success
+    # initialize success
     success = True
     
-    #find grid bondary points
+    # find grid bondary points
     data = np.nonzero(image)
     topLeft = ( data[1].min(), data[0].min() )
     bottomRight = ( data[1].max(), data[0].max() ) 
 
-    #creating the grid
-    #grid_width = 45     #width of each grid square
+    # creating the grid
+    # grid_width = 45     #width of each grid square
     centroids = []      #centroid for each grid
     end_x = bottomRight[0] - topLeft[0]
     end_y = bottomRight[1] - topLeft[1]
-    start_grid = time.time()
+    #start_grid = time.time()
 
-    #height, width for image array
+    # height, width for image array
     ys_to_search = np.linspace(0,end_y,int(end_y/grid_width),dtype=int)
     xs_to_search = np.linspace(0,end_x,int(end_x/grid_width),dtype=int)
     for i in range(len(xs_to_search)-1):
@@ -141,7 +150,7 @@ def kmeans_helper(image, advancement, grid_width = 45):
         #run silhouette algorithm (2 to 11 clusters)
         best_labels = None
         best_sil_score = -1
-        start_Ctime = time.time() 
+        #start_Ctime = time.time() 
         for k in range(2,11):
             kmeans = KMeans(n_clusters=k, init='k-means++')
             kmeans.fit(centroids)
@@ -156,21 +165,29 @@ def kmeans_helper(image, advancement, grid_width = 45):
 
         # establish bounding box for each cluster
         img = np.zeros((image.shape[0],image.shape[1]), np.uint8)
+        box_areas = [] # list of containing each box area
         for c in clusters:
             # find bounding values of cluster (min values)
             (xstart, ystart), (xstop, ystop) = c.min(0), c.max(0) 
-            # expand bounding box to include feature points (do not exceed image bounds)
-            ystart, xstart, ystop, xstop = expand_bounding_box(int(ystart), int(xstart), int(ystop), int(xstop), image.shape[1], image.shape[0], advancement = advancement)
+            # expand bounding box to include feature points for foreground (do not exceed image bounds)
+            ystart, xstart, ystop, xstop = expand_bounding_box( int(ystart), int(xstart), int(ystop), int(xstop), image.shape[1], image.shape[0],
+                                                               fg_advancement)
             foreground_mask = cv2.rectangle(img, (xstart, ystart), (xstop, ystop), color = (255,255,255), thickness=-1)
+            area = (xstop - xstart) * (ystop - ystart)
+            box_areas.append(area) 
+            # expand bounding box for what will become the background mask
+            (xstart, ystart), (xstop, ystop) = c.min(0), c.max(0) 
+            ystart, xstart, ystop, xstop = expand_bounding_box( int(ystart), int(xstart), int(ystop), int(xstop), image.shape[1], image.shape[0],
+                                                               bg_advancement)
+            fg_to_background = cv2.rectangle(img, (xstart, ystart), (xstop, ystop), color = (255,255,255), thickness=-1)
 
     except:
         success = False
         foreground_mask = None
         
-    return success, foreground_mask
+    return success, foreground_mask, fg_to_background, box_areas
 
-
-def create_fg_mask(fg_binary, image, advancement, color=False):
+def create_fg_mask(fg_binary, image,fg_advancement, bg_advancement, color = False):
     """
     Create foreground image using foreground binary image from background subtraction.
 
@@ -178,19 +195,27 @@ def create_fg_mask(fg_binary, image, advancement, color=False):
     ----------
     fg_binary : Numpy array
         Binary image obtained from frame subtraction.
-    image : Numpy array
-        Original image of foreground binary.
     color : bool, optional
         If set to true, the function will return the foreground in color; otherwise it will be a binary image.
-
+    fg_advancement : int
+        The number of pixels the bounding box for foreground image is to be expanded by.
+    bg_advancement : int 
+        The number of pixels the bounding box for background image is to be expanded by.
+    image : Numpy array
+        Original image of foreground binary.
+    
     Returns
     -------
-    fg_mask : Numpy array
+    success : bool
+        True if the clustering was successful.
+    fg : Numpy array
         Foreground image as either binary image or color image.
-
+    bg : Numpy array
+        Foreground mask with a different advancement value, will be inverted to be the background image. Always returns as a binary image (converted later).
+    box_areas : list of ints
+        List containing the area of each bounding box.
     """
-    success, fg = kmeans_helper(fg_binary, advancement)
+    success, fg, bg, box_areas = kmeans_helper(fg_binary,fg_advancement,bg_advancement)
     if color is True:
-        fg = cv2.bitwise_and(image, image, mask=fg)
-    return fg
-
+        fg  = cv2.bitwise_and(image,image, mask = fg)
+    return success, fg, bg, box_areas
