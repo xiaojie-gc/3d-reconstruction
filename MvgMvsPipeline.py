@@ -380,7 +380,7 @@ for cstep in CONF.steps:
             sys.exit('\r\nProcess canceled by user, all files remains')
     else:
         print('\t'.join(cmdline))
-    time_file["timeList"][i]["reconstruction time"][STEPS[cstep].info] = time.time() - startTime
+    time_file["timeList"][i]["reconstruction steps"][STEPS[cstep].info] = time.time() - startTime
 
 printout("# Pipeline end #", effect=INVERSE)
 
