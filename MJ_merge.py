@@ -16,6 +16,9 @@ from plyfile import PlyData
 import time
 import numpy as np
 from numpy import linalg as la
+import subprocess
+import sys
+import os
 
 #######################################################################
 # 0
@@ -290,3 +293,34 @@ def do_merge(path1, path2, path3, path4, path5):
                 f.write(str(B.elements[1].data[m][1][k]))
                 f.write(' ')
             f.write('\n')
+
+
+def merge(fg_output_dir, bg_output_dir, output_dir, str_timestamp):
+    if sys.platform.startswith('win'):
+        cmd = "where"
+    else:
+        cmd = "which"
+
+    ret = subprocess.run([cmd, "openMVG_main_SfMInit_ImageListing"], stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, check=True)
+    OPENMVG_BIN = os.path.split(ret.stdout.decode())[0]
+
+    pChange = subprocess.Popen(
+        [os.path.join(OPENMVG_BIN, "openMVG_main_ConvertSfM_DataFormat"), "-i", fg_output_dir + "/sfm/sfm_data.bin",
+         "-o", fg_output_dir + "/sfm/sfm_data.json"])
+    pChange.wait()
+
+    pChange = subprocess.Popen(
+        [os.path.join(OPENMVG_BIN, "openMVG_main_ConvertSfM_DataFormat"), "-i", bg_output_dir + "/sfm/sfm_data.bin",
+         "-o", bg_output_dir + "/sfm/sfm_data.json"])
+    pChange.wait()
+
+    # path 1 -> foreground.json
+    # path 2 -> background.json
+    # path 3 -> foreground final texture.ply
+    # path 4 -> background final texture.ply
+    # path 5 -> output.ply
+    merge.do_merge(fg_output_dir + "/sfm/sfm_data.json", bg_output_dir + "/sfm/sfm_data.json",
+                   fg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply",
+                   bg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply",
+                   output_dir + '/result_' + str_timestamp + '.ply')

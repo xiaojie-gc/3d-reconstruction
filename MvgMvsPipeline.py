@@ -340,6 +340,9 @@ for i in range(len(time_file["timeList"])):
         inx = i
         break
 
+time_file["timeList"][i]["reconstruction steps"] = {}
+
+
 for cstep in CONF.steps:
     printout("#%i. %s" % (cstep, STEPS[cstep].info), effect=INVERSE)
     startTime = time.time()
@@ -377,7 +380,7 @@ for cstep in CONF.steps:
             sys.exit('\r\nProcess canceled by user, all files remains')
     else:
         print('\t'.join(cmdline))
-    time_file["timeList"][i]["time"][STEPS[cstep].info] = time.time() - startTime
+    time_file["timeList"][i]["reconstruction time"][STEPS[cstep].info] = time.time() - startTime
 
 printout("# Pipeline end #", effect=INVERSE)
 

@@ -3,7 +3,7 @@ import sys
 import os
 import time
 import background_sub as bsub
-import MJ_merge as merge
+import MJ_merge as merge_process
 from pathlib import Path
 import argparse
 import subprocess
@@ -16,7 +16,7 @@ def execution_time_monitor(model, step, running_time):
         with open("time.json", "r") as jsonFile:
             time_file = json.load(jsonFile)
 
-        time_file["timeList"].append({"model": model, "time": {step: running_time}})
+        time_file["timeList"].append({"model": model, step: running_time})
 
         with open('time.json', 'w', encoding='utf-8') as f:
             json.dump(time_file, f, indent=4)
@@ -116,6 +116,7 @@ for timestamp in range(0, 21):
     execution_time_monitor(fg_dir, "background subtraction", time.time() - start)
 
     try:
+
         # start to run openMvg + openMvs for foreground
         print("start to reconstruct {}/{}".format(fg_dir, str_timestamp))
         start = time.time()
@@ -123,7 +124,7 @@ for timestamp in range(0, 21):
         p.wait()
         if p.returncode != 0:
             break
-        print("foreground finished in {}".format(time.time() - start))
+        execution_time_monitor(fg_dir, "foreground reconstruction", time.time() - start)
 
         # start to run openMvg + openMvs for background
         print("start to reconstruct {}/{}".format(bg_dir, str_timestamp))
@@ -132,51 +133,20 @@ for timestamp in range(0, 21):
         p.wait()
         if p.returncode != 0:
             break
-        print("foreground finished in {}".format(time.time() - start))
+        execution_time_monitor(bg_dir, "background reconstruction", time.time() - start)
+
     except Exception as e:
         print(e)
         # sys.exit('\r\nProcess canceled by user, all files remains')
         continue
 
     # start to merge foreground and background
-    if sys.platform.startswith('win'):
-        cmd = "where"
-    else:
-        cmd = "which"
-
     try:
-        ret = subprocess.run([cmd, "openMVG_main_SfMInit_ImageListing"], stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, check=True)
-        OPENMVG_BIN = os.path.split(ret.stdout.decode())[0]
-
-        pChange = subprocess.Popen(
-            [os.path.join(OPENMVG_BIN, "openMVG_main_ConvertSfM_DataFormat"), "-i", fg_output_dir + "/sfm/sfm_data.bin",
-             "-o", fg_output_dir + "/sfm/sfm_data.json"])
-        pChange.wait()
-
-        pChange = subprocess.Popen(
-            [os.path.join(OPENMVG_BIN, "openMVG_main_ConvertSfM_DataFormat"), "-i", bg_output_dir + "/sfm/sfm_data.bin",
-             "-o", bg_output_dir + "/sfm/sfm_data.json"])
-        pChange.wait()
-
-        # path 1 -> foreground.json
-        path1 = fg_output_dir + "/sfm/sfm_data.json"
-
-        # path 2 -> background.json
-        path2 = bg_output_dir + "/sfm/sfm_data.json"
-
-        # path 3 -> foreground final texture.ply
-        path3 = fg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
-
-        # path 4 -> background final texture.ply
-        path4 = bg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
-
-        # path 5 -> output.ply
-        path5 = args.output_dir + '/result_' + str_timestamp + '.ply'
-
-        merge.do_merge(path1, path2, path3, path4, path5)
-
-    except:
+        start = time.time()
+        merge_process.merge(fg_output_dir, bg_output_dir, args.output_dir, str_timestamp)
+        execution_time_monitor(fg_dir, "merge", time.time() - start)
+    except Exception as e:
+        print(e)
         fail["timestamp"].append(str_timestamp)
 
 
