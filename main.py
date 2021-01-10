@@ -10,6 +10,21 @@ import subprocess
 import shutil
 import json
 
+
+def execution_time_monitor(model, step, running_time):
+    try:
+        with open("time.json", "r") as jsonFile:
+            time_file = json.load(jsonFile)
+        for item in time_file["timeList"]:
+            if item["model"] == model:
+                item["time"][step] = running_time
+        with open('time.json', 'w', encoding='utf-8') as f:
+            json.dump(time_file, f, indent=4)
+
+    except Exception as e:
+        print(e)
+
+
 parser = argparse.ArgumentParser(description='Please specify the directory of data set')
 
 parser.add_argument('--data_dir', type=str, default='data/originals',
@@ -53,6 +68,7 @@ fail = { "timestamp": [] }
 
 for timestamp in range(0, 21):
     str_timestamp = str(timestamp).zfill(5)
+
     print("current timestamp: ", str_timestamp, '-' * 50)
 
     if timestamp > 0:
@@ -63,6 +79,8 @@ for timestamp in range(0, 21):
         # os.chmod(fg_dir, 0o777)
         Path(bg_dir).mkdir(parents=True, exist_ok=True)
         # os.chmod(bg_dir, 0o777)
+
+    start = time.time()
 
     # go through each camera
     for image_dir in os.listdir(args.data_dir):
@@ -94,6 +112,8 @@ for timestamp in range(0, 21):
 
     fg_output_dir = os.path.join(args.fg_dir, str_timestamp + "_output")
     bg_output_dir = os.path.join(args.bg_dir, str_timestamp + "_output")
+
+    execution_time_monitor(fg_dir, "background subtraction", time.time() - start)
 
     try:
         # start to run openMvg + openMvs for foreground

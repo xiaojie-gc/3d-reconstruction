@@ -330,7 +330,15 @@ if 2 in CONF.steps:    # ComputeMatches
 import json
 import time
 
-timeList = {}
+with open("time.json", "r") as jsonFile:
+    time_file = json.load(jsonFile)
+
+inx = None
+
+for i in range(len(time_file["timeList"])):
+    if time_file["timeList"][i]["model"] == CONF.input_dir:
+        inx = i
+        break
 
 for cstep in CONF.steps:
     printout("#%i. %s" % (cstep, STEPS[cstep].info), effect=INVERSE)
@@ -369,14 +377,9 @@ for cstep in CONF.steps:
             sys.exit('\r\nProcess canceled by user, all files remains')
     else:
         print('\t'.join(cmdline))
-    timeList[STEPS[cstep].info] = time.time() - startTime
+    time_file["timeList"][i]["time"][STEPS[cstep].info] = time.time() - startTime
 
 printout("# Pipeline end #", effect=INVERSE)
-
-with open("time.json", "r") as jsonFile:
-    time_file = json.load(jsonFile)
-
-time_file["timeList"].append({"model": CONF.input_dir , "time": timeList})
 
 with open('time.json', 'w', encoding='utf-8') as f:
     json.dump(time_file, f, indent=4)

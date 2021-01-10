@@ -76,6 +76,7 @@ def get_camera_data(data):
 
     return camera_extrinsics, camera_intrinsics
 
+
 # Running code
 def evaluation(json_file_path):
     start = time.perf_counter()
@@ -85,7 +86,7 @@ def evaluation(json_file_path):
         cam_extr, cam_intr = get_camera_data(data)
         num_of_cams = len(cam_extr)
         views = {}
-        #initialize each view with correct extrinsics and intrinsics
+        # initialize each view with correct extrinsics and intrinsics
         for i in range(0,num_of_cams):
             if len(cam_intr) == 1:
                 views[i] = ProjectionParams(cam_extr[i].rotation_matrix, cam_extr[i].translation_vector,
