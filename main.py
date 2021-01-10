@@ -38,7 +38,7 @@ with open('time.json', 'w', encoding='utf-8') as f:
 
 shutil.rmtree(args.fg_dir)
 shutil.rmtree(args.bg_dir)
-shutil.rmtree(args.output_dir)
+# shutil.rmtree(args.output_dir)
 
 Path(args.fg_dir).mkdir(parents=True, exist_ok=True)
 Path(args.bg_dir).mkdir(parents=True, exist_ok=True)
@@ -51,7 +51,7 @@ for image_dir in os.listdir(args.data_dir):
 
 fail = { "timestamp": [] }
 
-for timestamp in range(0, 2):
+for timestamp in range(0, 21):
     str_timestamp = str(timestamp).zfill(5)
     print("current timestamp: ", str_timestamp, '-' * 50)
 
@@ -81,11 +81,12 @@ for timestamp in range(0, 2):
         extracted_binary_foreground = backSub[image_dir].apply(image)
 
         # create background and foreground images
-        backsub_success, fg , bg_to_fg, box_areas = bsub.create_fg_mask( extracted_binary_foreground, image, fg_advancement = 120, 
-                                                                     bg_advancement = 90, color = True)
-        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), fg) # save foreground image
-        bg = bsub.create_background(bg_to_fg, image, color=True) # create background image
-        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), bg) # save background image
+        backsub_success, fg, bg_to_fg, box_areas = bsub.create_fg_mask(extracted_binary_foreground, image,
+                                                                       fg_advancement=120, bg_advancement=90,
+                                                                       color=True)
+        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), fg)  # save foreground image
+        bg = bsub.create_background(bg_to_fg, image, color=True)  # create background image
+        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), bg)  # save background image
 
     if timestamp == 0:
         continue
@@ -112,8 +113,10 @@ for timestamp in range(0, 2):
         if p.returncode != 0:
             break
         print("foreground finished in {}".format(time.time() - start))
-    except KeyboardInterrupt:
-        sys.exit('\r\nProcess canceled by user, all files remains')
+    except Exception as e:
+        print(e)
+        # sys.exit('\r\nProcess canceled by user, all files remains')
+        continue
 
     # start to merge foreground and background
     if sys.platform.startswith('win'):
@@ -136,19 +139,19 @@ for timestamp in range(0, 2):
              "-o", bg_output_dir + "/sfm/sfm_data.json"])
         pChange.wait()
 
-            # path 1 -> foreground.json
+        # path 1 -> foreground.json
         path1 = fg_output_dir + "/sfm/sfm_data.json"
 
-            # path 2 -> background.json
+        # path 2 -> background.json
         path2 = bg_output_dir + "/sfm/sfm_data.json"
 
-            # path 3 -> foreground final texture.ply
+        # path 3 -> foreground final texture.ply
         path3 = fg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
 
-            # path 4 -> background final texture.ply
+        # path 4 -> background final texture.ply
         path4 = bg_output_dir + "/mvs/scene_dense_mesh_refine_texture.ply"
 
-            # path 5 -> output.ply
+        # path 5 -> output.ply
         path5 = args.output_dir + '/result_' + str_timestamp + '.ply'
 
         merge.do_merge(path1, path2, path3, path4, path5)
