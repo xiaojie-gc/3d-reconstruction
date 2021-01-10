@@ -15,9 +15,9 @@ def execution_time_monitor(model, step, running_time):
     try:
         with open("time.json", "r") as jsonFile:
             time_file = json.load(jsonFile)
-        for item in time_file["timeList"]:
-            if item["model"] == model:
-                item["time"][step] = running_time
+
+        time_file["timeList"].append({"model": model, "time": {step: running_time}})
+
         with open('time.json', 'w', encoding='utf-8') as f:
             json.dump(time_file, f, indent=4)
 
