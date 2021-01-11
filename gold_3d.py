@@ -63,7 +63,7 @@ for timestamp in range(0, 21):
     # start to run openMvg + openMvs for foreground
     print("start to reconstruct {}".format(str_timestamp))
     start = time.time()
-    p = subprocess.Popen(["python3", args.reconstructor, collect_dir, args.output_dir])
+    p = subprocess.Popen(["python3", args.reconstructor, collect_dir, os.path.join(args.output_dir, str_timestamp + "_output")])
     p.wait()
     if p.returncode != 0:
         break
