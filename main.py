@@ -9,6 +9,7 @@ import argparse
 import subprocess
 import shutil
 import json
+import resolution
 
 
 def execution_time_monitor(model, step, running_time, new=True):
@@ -42,8 +43,9 @@ parser.add_argument('--output_dir', type=str, default='data/results',
                     help="the directory which contains the final results.")
 parser.add_argument('--reconstructor', type=str, default='MvgMvsPipeline.py',
                     help="the directory which contains the reconstructor python script.")
-parser.add_argument('--fg_adc', type=int, default=200, help="the advancement of foreground mask.")
-parser.add_argument('--bg_adc', type=int, default=160, help="the advancement of background mask.")
+parser.add_argument('--fg_adc', type=int, default=120, help="the advancement of foreground mask.")
+parser.add_argument('--bg_adc', type=int, default=90, help="the advancement of background mask.")
+parser.add_argument('--resolution', type=str, default="golden", help="the advancement of background mask.")
 
 
 args = parser.parse_args()
@@ -61,7 +63,7 @@ try:
     shutil.rmtree(args.bg_dir)
 except:
     print(".....")
-# shutil.rmtree(args.output_dir)
+
 
 Path(args.fg_dir).mkdir(parents=True, exist_ok=True)
 Path(args.bg_dir).mkdir(parents=True, exist_ok=True)
@@ -72,7 +74,15 @@ backSub = {}
 for image_dir in os.listdir(args.data_dir):
     backSub[image_dir] = cv2.createBackgroundSubtractorMOG2(history=10, varThreshold=216, detectShadows=False)
 
-fail = { "timestamp": [] }
+fail = {
+    "timestamp": []
+}
+
+R = {
+    "golden": (1920, 1080),
+    "720p": (1280, 720),
+    "480p": (720, 480)
+}
 
 for timestamp in range(0, 21):
     str_timestamp = str(timestamp).zfill(5)
@@ -96,9 +106,11 @@ for timestamp in range(0, 21):
         img_file_name = str_timestamp + ".png"
         print("\tload image {} from camera #{}".format(img_file_name, image_dir))
 
-        image = cv2.imread(os.path.join(args.data_dir, image_dir, img_file_name))
-
-        # print(os.path.join(args.data_dir, image_dir, img_file_name))
+        if args.resolution != "golden":
+            new_file_name = str_timestamp + "_" + args.resolution + ".png"
+            image = resolution.update(R[args.resolution], os.path.join(args.data_dir, image_dir, img_file_name))
+        else:
+            image = cv2.imread(os.path.join(args.data_dir, image_dir, img_file_name))
 
         if timestamp == 0:  # run background subtraction algorithm on first image
             backSub[image_dir].apply(image)
@@ -108,11 +120,11 @@ for timestamp in range(0, 21):
 
         # create background and foreground images
         # save foreground image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=120, color=True)
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.fg_adc, color=True)
         cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask)  # regular image
 
         # save background image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=90, color=False)
+        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.bg_adc, color=False)
         background_mask = bsub.create_background(img_mask, image, color=True)
         cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask)  # regular image
 
