@@ -106,11 +106,11 @@ for timestamp in range(0, 21):
         img_file_name = str_timestamp + ".png"
         print("\tload image {} from camera #{}".format(img_file_name, image_dir))
 
+        image = cv2.imread(os.path.join(args.data_dir, image_dir, img_file_name))
+
         if args.resolution != "golden":
             new_file_name = str_timestamp + "_" + args.resolution + ".png"
-            image = resolution.update(R[args.resolution], os.path.join(args.data_dir, image_dir, img_file_name))
-        else:
-            image = cv2.imread(os.path.join(args.data_dir, image_dir, img_file_name))
+            image = cv2.resize(image, R[args.resolution])
 
         if timestamp == 0:  # run background subtraction algorithm on first image
             backSub[image_dir].apply(image)
