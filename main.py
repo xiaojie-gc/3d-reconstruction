@@ -124,6 +124,7 @@ for timestamp in range(0, 21):
     bg_output_dir = os.path.join(args.bg_dir, str_timestamp + "_output")
 
     execution_time_monitor(fg_dir, "background subtraction", time.time() - start, new=True)
+    execution_time_monitor(bg_dir, "background subtraction", 0)
 
     try:
 
