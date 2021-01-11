@@ -44,11 +44,12 @@ for timestamp in range(0, 21):
 
     start = time.time()
     # go through each camera
+    inx = 0
     for image_dir in os.listdir(args.data_dir):
         # image file format = 000004.png
         img_file_name = str_timestamp + ".png"
         print("\tload image {} from camera #{}".format(img_file_name, image_dir))
-        shutil.copy2(os.path.join(args.data_dir, image_dir, img_file_name), os.path.join(collect_dir))
+        shutil.copy2(os.path.join(args.data_dir, image_dir, img_file_name), os.path.join(collect_dir, str(inx) + ".png"))
 
     """
     with open("time.json", "r") as jsonFile:
