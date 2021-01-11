@@ -144,7 +144,7 @@ for timestamp in range(0, 21):
         p.wait()
         if p.returncode != 0:
             break
-        execution_time_monitor(bg_dir, "background reconstruction", time.time() - start)
+        execution_time_monitor(bg_dir, "background reconstruction", time.time() - start, new=False)
 
     except Exception as e:
         print(e)
