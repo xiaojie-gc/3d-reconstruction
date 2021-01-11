@@ -339,6 +339,8 @@ for i in range(len(time_file["timeList"])):
     if time_file["timeList"][i]["model"] == CONF.input_dir:
         inx = i
         break
+    else:
+        print("{}/{}".format(time_file["timeList"][i]["model"], CONF.input_dir))
 
 time_file["timeList"][inx]["reconstruction steps"] = {}
 
