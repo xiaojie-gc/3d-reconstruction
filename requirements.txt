@@ -2,3 +2,4 @@ sklearn
 numpy==1.18.1
 opencv-python
 plyfile
+pillow
