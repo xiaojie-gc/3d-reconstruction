@@ -52,7 +52,6 @@ for timestamp in range(0, 21):
         shutil.copy2(os.path.join(args.data_dir, image_dir, img_file_name), os.path.join(collect_dir, str(inx) + ".png"))
         inx += 1
 
-    """
     with open("time.json", "r") as jsonFile:
         time_file = json.load(jsonFile)
 
@@ -68,4 +67,3 @@ for timestamp in range(0, 21):
     p.wait()
     if p.returncode != 0:
         break
-    """
