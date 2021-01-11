@@ -56,8 +56,11 @@ time_file["timeList"] = []
 with open('time.json', 'w', encoding='utf-8') as f:
     json.dump(time_file, f, indent=4)
 
-shutil.rmtree(args.fg_dir)
-shutil.rmtree(args.bg_dir)
+try:
+    shutil.rmtree(args.fg_dir)
+    shutil.rmtree(args.bg_dir)
+except:
+    print(".....")
 # shutil.rmtree(args.output_dir)
 
 Path(args.fg_dir).mkdir(parents=True, exist_ok=True)
