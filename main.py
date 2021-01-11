@@ -71,7 +71,7 @@ for image_dir in os.listdir(args.data_dir):
 
 fail = { "timestamp": [] }
 
-for timestamp in range(0, 2):
+for timestamp in range(0, 21):
     str_timestamp = str(timestamp).zfill(5)
 
     print("current timestamp: ", str_timestamp, '-' * 50)
