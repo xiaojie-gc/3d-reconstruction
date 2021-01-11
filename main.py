@@ -71,7 +71,7 @@ for image_dir in os.listdir(args.data_dir):
 
 fail = { "timestamp": [] }
 
-for timestamp in range(0, 21):
+for timestamp in range(0, 2):
     str_timestamp = str(timestamp).zfill(5)
 
     print("current timestamp: ", str_timestamp, '-' * 50)
@@ -105,7 +105,7 @@ for timestamp in range(0, 21):
 
         # create background and foreground images
         backsub_success, fg, bg_to_fg, box_areas = bsub.create_fg_mask(extracted_binary_foreground, image,
-                                                                       fg_advancement=120, bg_advancement=90,
+                                                                       fg_advancement=90, bg_advancement=120,
                                                                        color=True)
         cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), fg)  # save foreground image
         bg = bsub.create_background(bg_to_fg, image, color=True)  # create background image
