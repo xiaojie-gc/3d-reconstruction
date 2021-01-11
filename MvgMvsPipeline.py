@@ -336,11 +336,9 @@ with open("time.json", "r") as jsonFile:
 inx = None
 
 for i in range(len(time_file["timeList"])):
-    if time_file["timeList"][i]["model"] == CONF.input_dir:
+    if CONF.input_dir.__contains__(time_file["timeList"][i]["model"]):
         inx = i
         break
-    else:
-        print("{}/{}".format(time_file["timeList"][i]["model"], CONF.input_dir))
 
 time_file["timeList"][inx]["reconstruction steps"] = {}
 
