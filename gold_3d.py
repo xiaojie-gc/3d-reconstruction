@@ -49,3 +49,21 @@ for timestamp in range(0, 21):
         img_file_name = str_timestamp + ".png"
         print("\tload image {} from camera #{}".format(img_file_name, image_dir))
         shutil.copy2(os.path.join(args.data_dir, image_dir, img_file_name), os.path.join(collect_dir))
+
+    """
+    with open("time.json", "r") as jsonFile:
+        time_file = json.load(jsonFile)
+
+    time_file["timeList"].append({"model": collect_dir})
+
+    with open('time.json', 'w', encoding='utf-8') as f:
+        json.dump(time_file, f, indent=4)
+
+    # start to run openMvg + openMvs for foreground
+    print("start to reconstruct {}".format(str_timestamp))
+    start = time.time()
+    p = subprocess.Popen(["python3", args.reconstructor, collect_dir, args.output_dir])
+    p.wait()
+    if p.returncode != 0:
+        break
+    """
