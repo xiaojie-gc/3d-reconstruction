@@ -2,6 +2,7 @@ import json
 import time
 import numpy as np
 import cv2
+import sys
 
 class Extrinsics:
     def __init__(self, rotation_matrix, translation_vector, r_t_matrix):
@@ -109,25 +110,33 @@ def evaluation(json_file_path):
                 # append 2d gt point to corresponding view
                 views[view_num].x.append(gt_x)
     
-    
     mean_error = 0
     for view in views:
         X, rotation, translation, k_matrix, distortion, x = views[view].get_params()
         X = np.float32(X)
         rotVec,_ = cv2.Rodrigues(rotation)
-        #fake_dist = np.append(distortion, np.array([0]))
-        imgpoints2, _ = cv2.projectPoints(X, rotVec, translation, k_matrix, None )
+        # Assuming k1,k2,p1,p2,k3 | This assumes that distortion is k3 model (what openMVG usually outputs)
+        # since p1,p2 are not given, assume they are zero
+        distortion = np.insert(distortion,2,[0,0])
+        try:
+            imgpoints2, _ = cv2.projectPoints(X, rotVec, translation, k_matrix, distortion)
+        except:
+            # an unexpected distortion model was used
+            sys.stderr.write("The distortion coefficients passed do not have the correct dimensions. Support for other distortion models will need to be added.")
+            break
         imgpoints2 = imgpoints2.reshape(-1,2)
         gt_x = np.array( x )
-        mean_error += np.absolute( gt_x - imgpoints2).mean(axis=None)
-        print("Average Error for View: ", np.absolute( gt_x - imgpoints2).mean(axis=None), '\n', '-'*50)
+        diff = np.absolute(gt_x - imgpoints2)
+        mean_error += diff.mean(axis=0)
+        #print("Average Error for View: ", diff.mean(axis=0), '\n', '-'*50)
     
-    print("Average error is:", mean_error / num_of_cams )
+    print("Average error for (x,y) is:", mean_error / num_of_cams ) #num of cams is used because error is calculated per point for each view
+    print("Average error as one value: ", np.mean(mean_error / num_of_cams))
     print("Total time: ", time.perf_counter() - start)
     return mean_error / num_of_cams
         
 # test
 
-#json_file = r"C:\Users\Andre/export1.json"
-json_file = r"C:\Users\Andre/export_example.json"
+json_file = r"C:\Users\Andre/export1.json"
+#json_file = r"C:\Users\Andre/export_example.json"
 error = evaluation(json_file)
