@@ -117,16 +117,16 @@ for timestamp in range(0, 21):
             continue
 
         extracted_binary_foreground = backSub[image_dir].apply(image)
-
         # create background and foreground images
-        # save foreground image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.fg_adc, color=True)
-        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask)  # regular image
+        success, img_mask, bg_to_fg, box_coords = bsub.create_fg_mask( extracted_binary_foreground, image, fg_advancement = args.fg_adc,
+                                                                     bg_advancement = args.bg_adc, color = True)
+        background_mask =  bsub.create_background(img_mask, image, color=True)
+        # box coords 0 index is top left coordinate for box 1, 1 index is bottom right box 1, 2 index is top left for box 2 if neccassarry and so on
+        # coordinates themselves list 1x2 numpy arrays containing x then y
 
-        # save background image
-        img_mask = bsub.create_fg_mask(extracted_binary_foreground, image, advancement=args.bg_adc, color=False)
-        background_mask = bsub.create_background(img_mask, image, color=True)
-        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask)  # regular image
+        # # create background and foreground images
+        cv2.imwrite(os.path.join(fg_dir, image_dir + "_" + str_timestamp + "_fg.png"), img_mask)
+        cv2.imwrite(os.path.join(bg_dir, image_dir + "_" + str_timestamp + "_bg.png"), background_mask)
 
     if timestamp == 0:
         continue
@@ -203,8 +203,3 @@ for timestamp in range(0, 21):
 
 with open('fail.json', 'w', encoding='utf-8') as f:
     json.dump(fail, f, indent=4)
-
-
-
-
-
