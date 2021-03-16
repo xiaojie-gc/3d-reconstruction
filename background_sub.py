@@ -166,6 +166,11 @@ def kmeans_helper(image, fg_advancement, bg_advancement, grid_width = 45):
         # establish bounding box for each cluster
         img = np.zeros((image.shape[0],image.shape[1]), np.uint8)
         box_areas = [] # list of containing each box top left and bottom right
+        #for mingjun TEST ONLY
+        xmins = list()
+        xmaxs = list()
+        ymins = list()
+        ymaxs = list()
         for c in clusters:
             # find bounding values of cluster (min values)
             (xstart, ystart), (xstop, ystop) = c.min(0), c.max(0) 
@@ -173,16 +178,21 @@ def kmeans_helper(image, fg_advancement, bg_advancement, grid_width = 45):
             ystart, xstart, ystop, xstop = expand_bounding_box( int(ystart), int(xstart), int(ystop), int(xstop), image.shape[1], image.shape[0],
                                                                fg_advancement)
             foreground_mask = cv2.rectangle(img, (xstart, ystart), (xstop, ystop), color = (255,255,255), thickness=-1)
+            xmins.append(xstart) , xmaxs.append(xstop), ymins.append(ystart), ymaxs.append(ystop)
             # area = (xstop - xstart) * (ystop - ystart) 
-            box_areas.append( np.array([xstart,ystart]) )  
-            box_areas.append( np.array([xstop, ystop]) )
+            # box_areas.append( np.array([xstart,ystart]) )  
+            # box_areas.append( np.array([xstop, ystop]) )
             # box_areas.append(c.max(0))
             # expand bounding box for what will become the background mask
             (xstart, ystart), (xstop, ystop) = c.min(0), c.max(0) 
             ystart, xstart, ystop, xstop = expand_bounding_box( int(ystart), int(xstart), int(ystop), int(xstop), image.shape[1], image.shape[0],
                                                                bg_advancement)
             fg_to_background = cv2.rectangle(img, (xstart, ystart), (xstop, ystop), color = (255,255,255), thickness=-1)
-
+        xmin = min(xmins)
+        xmax = max(xmaxs)
+        ymin = min(ymins)
+        ymax = max(ymaxs)
+        box_areas.extend([xmin,xmax, ymin,ymax])
     except:
         success = False
         foreground_mask = None
